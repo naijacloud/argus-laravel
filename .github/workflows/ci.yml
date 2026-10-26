@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # release.yml calls this workflow rather than repeating the matrix.
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}, Laravel ${{ matrix.laravel }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      # Each supported Laravel major on the oldest PHP it allows, and the
+      # newest on the newest PHP.
+      matrix:
+        include:
+          - { php: '8.1', laravel: '10', testbench: '8' }
+          - { php: '8.2', laravel: '11', testbench: '9' }
+          - { php: '8.3', laravel: '12', testbench: '10' }
+          - { php: '8.3', laravel: '13', testbench: '11' }
+          - { php: '8.4', laravel: '13', testbench: '11', analyse: true }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, json, zlib, pdo_sqlite
+          coverage: none
+          ini-values: error_reporting=E_ALL, display_errors=On
+
+      - name: Validate composer.json
+        run: composer validate
+
+      # Until naijacloud/argus is on Packagist, test against its main branch
+      # through a path repository in a CI-only composer.local.json. The
+      # committed composer.json always requires it from Packagist.
+      - name: Resolve naijacloud/argus
+        run: |
+          if composer show --all naijacloud/argus >/dev/null 2>&1; then
+            echo "naijacloud/argus comes from Packagist"
+          else
+            git clone --depth 1 https://github.com/naijacloud/argus-php ../argus-php
+            php -r '$c = json_decode(file_get_contents("composer.json"), true); $c["repositories"] = [["type" => "path", "url" => "../argus-php", "options" => ["symlink" => false]]]; file_put_contents("composer.local.json", json_encode($c, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));'
+            echo "COMPOSER=composer.local.json" >> "$GITHUB_ENV"
+            echo "naijacloud/argus comes from argus-php main"
+          fi
+
+      - name: Install Laravel ${{ matrix.laravel }}
+        run: |
+          # Laravel 10 and 11 are past security support: every release has an
+          # open advisory, and Composer refuses to install them. They are
+          # still supported by this package, so test them anyway.
+          if [ "${{ matrix.laravel }}" -lt 12 ]; then
+            composer config policy.advisories.block false 2>/dev/null || composer config audit.block-insecure false
+          fi
+          composer require --no-update --no-interaction \
+            "illuminate/console:^${{ matrix.laravel }}.0" \
+            "illuminate/contracts:^${{ matrix.laravel }}.0" \
+            "illuminate/support:^${{ matrix.laravel }}.0" \
+            "orchestra/testbench:^${{ matrix.testbench }}.0"
+          composer update --no-interaction --no-progress --prefer-dist
+          composer show laravel/framework orchestra/testbench phpunit/phpunit naijacloud/argus | grep -E '^(name|versions)'
+
+      - name: Lint every PHP file
+        run: find src tests config -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+
+      # Framework types differ between majors; analyse against the newest.
+      - name: Static analysis
+        if: matrix.analyse
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Run the test suite
+        run: vendor/bin/phpunit --colors=always

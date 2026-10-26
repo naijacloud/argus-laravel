@@ -1,0 +1,88 @@
+name: Release
+
+# Packagist has no upload: it reads tags from GitHub. Once the package is
+# submitted on packagist.org and the GitHub hook is installed, pushing a tag is
+# the release. This workflow checks the tag is one worth having (CI passes,
+# composer.json matches it, the changelog has its section, and the package
+# requires the core from Packagist) and creates the GitHub release.
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag against the package
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(php -r 'echo json_decode(file_get_contents("composer.json"), true)["version"] ?? "";')"
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Tag $TAG does not match composer.json version ($version). Packagist would skip this tag."
+            exit 1
+          fi
+          # The published package must resolve the core from Packagist.
+          php -r '$c = json_decode(file_get_contents("composer.json"), true); exit(isset($c["repositories"]) ? 1 : 0);' || {
+            echo "::error::composer.json has a repositories entry. Local path repositories belong in composer.local.json."
+            exit 1
+          }
+          # And the core it requires must be released: the tag would install nowhere otherwise.
+          composer show --all naijacloud/argus >/dev/null 2>&1 || {
+            echo "::error::naijacloud/argus is not on Packagist yet. Release argus-php first."
+            exit 1
+          }
+          case "$version" in
+            *-*) ;;
+            *) grep -q "^## \[$version\]" CHANGELOG.md || {
+                 echo "::error::CHANGELOG.md has no '## [$version]' heading."
+                 exit 1
+               } ;;
+          esac
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Create the GitHub release from the changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 { on = 1; next }
+            on && /^## / { exit }
+            on && !/^\[[^]]+\]: / { print }
+          ' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "See CHANGELOG.md." > notes.md
+          flags=()
+          case "$VERSION" in *-*) flags+=(--prerelease) ;; esac
+          gh release create "$TAG" --title "$TAG" --notes-file notes.md "${flags[@]}"
+
+      - name: Tell Packagist about the tag
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+        run: |
+          if [ -z "$PACKAGIST_USERNAME" ] || [ -z "$PACKAGIST_TOKEN" ]; then
+            echo "No Packagist API token set; relying on the GitHub hook to pick up the tag."
+            exit 0
+          fi
+          curl -fsS -X POST \
+            -H 'Content-Type: application/json' \
+            "https://packagist.org/api/update-package?username=${PACKAGIST_USERNAME}&apiToken=${PACKAGIST_TOKEN}" \
+            -d '{"repository":{"url":"https://packagist.org/packages/naijacloud/argus-laravel"}}'

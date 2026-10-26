@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="argus-laravel">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+    <php>
+        <!-- Never the network, never a developer's real DSN. -->
+        <env name="ARGUS_DSN" value="" force="true"/>
+        <env name="SENTRY_DSN" value="" force="true"/>
+        <env name="ARGUS_ENVIRONMENT" value="" force="true"/>
+        <env name="SENTRY_ENVIRONMENT" value="" force="true"/>
+        <env name="ARGUS_RELEASE" value="" force="true"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+    </php>
+</phpunit>

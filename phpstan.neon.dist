@@ -1,0 +1,14 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - config
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Deliberate: the package supports Laravel 10.0 onwards, and early 10.x
+        # releases have no Http::globalRequestMiddleware(). Analysed against the
+        # newest Laravel, the check looks redundant; it is not.
+        -
+            identifier: function.alreadyNarrowedType
+            path: src/Integrations/EventIntegration.php
+            count: 1

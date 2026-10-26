@@ -1,0 +1,71 @@
+{
+    "name": "naijacloud/argus-laravel",
+    "description": "Official Laravel SDK for Naijacloud Argus: exceptions, logs, request and job tracing, scheduler check-ins and feature flags.",
+    "type": "library",
+    "keywords": [
+        "naijacloud",
+        "argus",
+        "laravel",
+        "error-tracking",
+        "monitoring",
+        "logging",
+        "tracing",
+        "apm",
+        "sentry"
+    ],
+    "homepage": "https://www.naijacloud.com/argus",
+    "license": "MIT",
+    "version": "0.1.0",
+    "authors": [
+        {
+            "name": "Naija Cloud",
+            "homepage": "https://www.naijacloud.com"
+        }
+    ],
+    "support": {
+        "email": "support@naijacloud.com",
+        "issues": "https://github.com/naijacloud/argus-laravel/issues"
+    },
+    "require": {
+        "php": ">=8.1",
+        "illuminate/console": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/contracts": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+        "monolog/monolog": "^3.0",
+        "naijacloud/argus": "^0.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5|^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NaijaCloud\\Argus\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NaijaCloud\\Argus\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "NaijaCloud\\Argus\\Laravel\\ArgusServiceProvider"
+            ],
+            "aliases": {
+                "Argus": "NaijaCloud\\Argus\\Laravel\\Facades\\Argus"
+            }
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --no-progress"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
