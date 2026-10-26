@@ -115,7 +115,7 @@ final class ArgusServiceProvider extends ServiceProvider
             'send_default_pii' => (bool) $c->get('argus.send_default_pii', false),
             'debug' => (bool) $c->get('argus.debug', false),
             'flush_timeout_ms' => (int) $c->get('argus.flush_timeout_ms', 2000),
-            'flags_timeout_ms' => (int) $c->get('argus.flags_timeout_ms', 1000),
+            'flags_timeout_ms' => (int) $c->get('argus.flags_timeout_ms', 2000),
             'ignore_exceptions' => (array) $c->get('argus.ignore_exceptions', []),
             'project_root' => $app->basePath(),
             // Laravel installs its own error and exception handlers and turns

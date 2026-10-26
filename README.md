@@ -165,7 +165,7 @@ php artisan vendor:publish --tag=argus-config
 | `ARGUS_SEND_DEFAULT_PII` | `false` | Also send the user's IP, email and name |
 | `ARGUS_LOG_LEVEL` | `debug` | Lowest level the `argus` log channel sends |
 | `ARGUS_FLUSH_TIMEOUT_MS` | `2000` | Most time spent sending after a response |
-| `ARGUS_FLAGS_TIMEOUT_MS` | `1000` | Most time a flag check waits |
+| `ARGUS_FLAGS_TIMEOUT_MS` | `2000` | Most time a flag check waits |
 | `ARGUS_DEBUG` | `false` | Write what the SDK does to the PHP error log |
 
 The config file also has these settings:

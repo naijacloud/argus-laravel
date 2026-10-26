@@ -35,7 +35,7 @@ return [
     // The most time a request spends sending to Argus after the response, and
     // the most a feature-flag check waits, in milliseconds.
     'flush_timeout_ms' => (int) env('ARGUS_FLUSH_TIMEOUT_MS', 2000),
-    'flags_timeout_ms' => (int) env('ARGUS_FLAGS_TIMEOUT_MS', 1000),
+    'flags_timeout_ms' => (int) env('ARGUS_FLAGS_TIMEOUT_MS', 2000),
 
     // A callable that may change an event, or return null to drop it. Use a
     // [class, method] pair rather than a closure so config:cache still works:
