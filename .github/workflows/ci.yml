@@ -69,7 +69,9 @@ jobs:
             "illuminate/support:^${{ matrix.laravel }}.0" \
             "orchestra/testbench:^${{ matrix.testbench }}.0"
           composer update --no-interaction --no-progress --prefer-dist
-          composer show laravel/framework orchestra/testbench phpunit/phpunit naijacloud/argus | grep -E '^(name|versions)'
+          for p in laravel/framework orchestra/testbench phpunit/phpunit naijacloud/argus; do
+            composer show "$p" | grep -E '^(name|versions)'
+          done
 
       - name: Lint every PHP file
         run: find src tests config -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
