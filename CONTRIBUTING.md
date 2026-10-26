@@ -40,7 +40,8 @@ Once `naijacloud/argus` is on Packagist, a plain `composer install` works too.
 - **Scenarios:** the scenario (ok, 401, 429, 500 ...) rides in the DSN's path
   prefix, the same as in `argus-php`.
 
-CI runs Laravel 10 on PHP 8.1, 11 on 8.2, 12 on 8.3, and 13 on 8.3 and 8.4.
+CI runs Laravel 10 and 11 on PHP 8.2, 12 on 8.3, and 13 on 8.3, 8.4 and 8.5, each
+the minor's latest patched release.
 Before a pull request, run:
 
 ```bash

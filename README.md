@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://packagist.org/packages/naijacloud/argus-laravel"><img alt="packagist" src="https://img.shields.io/badge/packagist-naijacloud%2Fargus--laravel-008751?style=flat-square&labelColor=0A0E0C"></a>
   <img alt="laravel" src="https://img.shields.io/badge/laravel-10_%7C_11_%7C_12_%7C_13-FF2D20?style=flat-square&labelColor=0A0E0C">
-  <img alt="php" src="https://img.shields.io/badge/php-%3E%3D_8.1-8892BF?style=flat-square&labelColor=0A0E0C">
+  <img alt="php" src="https://img.shields.io/badge/php-%3E%3D_8.2.35-8892BF?style=flat-square&labelColor=0A0E0C">
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-8A988F?style=flat-square&labelColor=0A0E0C"></a>
 </p>
 
@@ -30,7 +30,8 @@ with one key: your app's **DSN**.
 
 It builds on [`naijacloud/argus`](https://github.com/naijacloud/argus-php),
 implements the Argus SDK contract `argus.sdk/1`, and supports Laravel 10, 11,
-12 and 13 on PHP 8.1 or newer.
+12 and 13 on a patched PHP: 8.2.35, 8.3.36, 8.4.27, 8.5.12 or newer (the
+php2shell fix, CVE-2026-109618/109619). Composer refuses older releases on purpose.
 
 ## Install
 
